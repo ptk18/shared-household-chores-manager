@@ -1,0 +1,103 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Chores{% endblock %}</title>
+  <style>
+    :root {
+      --ink: #1d2021; --muted: #6b6f72; --line: #e3e1dc;
+      --paper: #faf9f6; --card: #ffffff;
+      --accent: #3f6d5c; --warn: #a8562c; --ok: #3f6d5c;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; background: var(--paper); color: var(--ink);
+      font: 15px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+    a { color: var(--accent); }
+    header.bar {
+      display: flex; align-items: baseline; gap: 1rem; flex-wrap: wrap;
+      padding: 1rem 1.5rem; border-bottom: 1px solid var(--line); background: var(--card);
+    }
+    header.bar h1 { font-size: 1.05rem; margin: 0; letter-spacing: -0.01em; }
+    header.bar nav { margin-left: auto; display: flex; gap: 1rem; font-size: .875rem; }
+    main { max-width: 62rem; margin: 0 auto; padding: 1.5rem; }
+    section.panel {
+      background: var(--card); border: 1px solid var(--line);
+      border-radius: 10px; padding: 1.1rem 1.25rem; margin-bottom: 1.25rem;
+    }
+    section.panel > h2 {
+      margin: 0 0 .85rem; font-size: .78rem; text-transform: uppercase;
+      letter-spacing: .09em; color: var(--muted); font-weight: 600;
+    }
+    ul.chores { list-style: none; margin: 0; padding: 0; }
+    ul.chores li {
+      display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+      padding: .6rem 0; border-top: 1px solid var(--line);
+    }
+    ul.chores li:first-child { border-top: 0; }
+    .name { font-weight: 550; }
+    .meta { color: var(--muted); font-size: .82rem; }
+    .spacer { margin-left: auto; }
+    .tag {
+      font-size: .7rem; text-transform: uppercase; letter-spacing: .06em;
+      padding: .15rem .45rem; border-radius: 4px; border: 1px solid var(--line);
+      color: var(--muted);
+    }
+    .tag.overdue { color: var(--warn); border-color: #e6cbbc; background: #fdf3ee; }
+    .tag.weight { font-variant-numeric: tabular-nums; }
+    button.action {
+      font: inherit; font-size: .82rem; padding: .3rem .7rem; cursor: pointer;
+      border-radius: 6px; border: 1px solid var(--accent);
+      background: var(--accent); color: #fff;
+    }
+    button.action.ghost { background: transparent; color: var(--accent); }
+    .empty { color: var(--muted); font-style: italic; }
+    table.fairness { width: 100%; border-collapse: collapse; font-size: .9rem; }
+    table.fairness th {
+      text-align: left; font-size: .72rem; text-transform: uppercase;
+      letter-spacing: .06em; color: var(--muted); font-weight: 600;
+      padding-bottom: .4rem;
+    }
+    table.fairness td { padding: .4rem 0; border-top: 1px solid var(--line); }
+    table.fairness td.num { text-align: right; font-variant-numeric: tabular-nums; }
+    .bar-track {
+      position: relative; height: 6px; background: #eeece7;
+      border-radius: 3px; overflow: hidden; min-width: 6rem;
+    }
+    .bar-fill { position: absolute; inset: 0 auto 0 0; background: var(--accent); }
+    .bar-fill.over { background: var(--warn); }
+    .verdict { font-size: .875rem; color: var(--muted); margin: .75rem 0 0; }
+    ul.messages { list-style: none; padding: 0; margin: 0 0 1rem; }
+    ul.messages li {
+      padding: .6rem .85rem; border-radius: 8px; font-size: .9rem;
+      border: 1px solid var(--line); background: var(--card); margin-bottom: .5rem;
+    }
+    ul.messages li.error { border-color: #e6cbbc; background: #fdf3ee; color: var(--warn); }
+    form.inline { display: inline; }
+  </style>
+</head>
+<body>
+<header class="bar">
+  <h1>{% block heading %}Chores{% endblock %}</h1>
+  <nav>
+    {% if request.member %}
+      <a href="{% url 'chores:dashboard' %}">Dashboard</a>
+      {% if request.member.is_admin %}<a href="{% url 'chores:household_settings' %}">Settings</a>{% endif %}
+      <form class="inline" method="post" action="{% url 'logout' %}">
+        {% csrf_token %}<button class="action ghost" type="submit">Sign out</button>
+      </form>
+    {% endif %}
+  </nav>
+</header>
+<main>
+  {% if messages %}
+    <ul class="messages">
+      {% for message in messages %}<li class="{{ message.tags }}">{{ message }}</li>{% endfor %}
+    </ul>
+  {% endif %}
+  {% block content %}{% endblock %}
+</main>
+</body>
+</html>

@@ -1,0 +1,60 @@
+{% extends 'chores/base.html' %}
+{% load chore_extras %}
+
+{% block title %}{{ occurrence.chore.name }}{% endblock %}
+{% block heading %}{{ occurrence.chore.name }}{% endblock %}
+
+{% block content %}
+<section class="panel">
+  <h2>This chore</h2>
+  <p class="meta">
+    {{ occurrence.chore.get_category_display }} ·
+    {{ occurrence.chore.get_frequency_display }} ·
+    effort {{ occurrence.chore.effort_weight }} ·
+    due {{ occurrence.due_date|date:"l j F" }} ·
+    {{ occurrence.get_status_display|lower }}
+    {% if occurrence.assigned_to %}· assigned to {{ occurrence.assigned_to.display_name }}{% endif %}
+  </p>
+  {% if can_complete %}
+    <form class="inline" method="post" action="{% url 'chores:complete' occurrence.pk %}">
+      {% csrf_token %}<button class="action" type="submit">Mark done</button>
+    </form>
+  {% endif %}
+  {% if can_claim %}
+    <form class="inline" method="post" action="{% url 'chores:claim' occurrence.pk %}">
+      {% csrf_token %}<button class="action ghost" type="submit">Claim it</button>
+    </form>
+  {% endif %}
+</section>
+
+<section class="panel">
+  <h2>Suggested for</h2>
+  {% if recommendations %}
+    <table class="fairness">
+      <thead>
+        <tr>
+          <th>Member</th><th class="num">Fit</th><th class="num">Workload</th>
+          <th class="num">Preference</th><th class="num">Availability</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for pick in recommendations %}
+          <tr>
+            <td>{{ pick.member.display_name }}</td>
+            <td class="num">{{ pick.score|percent }}%</td>
+            <td class="num">{{ pick.breakdown.workload|percent }}%</td>
+            <td class="num">{{ pick.breakdown.preference|percent }}%</td>
+            <td class="num">{{ pick.breakdown.availability|percent }}%</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <p class="verdict">
+      Ranked by workload, stated preference, availability and suitability —
+      shown in full so you can disagree with the suggestion.
+    </p>
+  {% else %}
+    <p class="empty">Nobody in the household is set up to do this chore.</p>
+  {% endif %}
+</section>
+{% endblock %}

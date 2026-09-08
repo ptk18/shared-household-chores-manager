@@ -1,0 +1,29 @@
+{% comment %}
+One chore occurrence. `actions` controls whether complete/claim buttons render,
+so the same row works in a read-only list and an actionable one.
+{% endcomment %}
+<li>
+  <span class="name">
+    <a href="{% url 'chores:occurrence_detail' occurrence.pk %}">{{ occurrence.chore.name }}</a>
+  </span>
+  <span class="tag weight">effort {{ occurrence.chore.effort_weight }}</span>
+  {% if occurrence.status == 'overdue' %}<span class="tag overdue">overdue</span>{% endif %}
+  <span class="meta">
+    due {{ occurrence.due_date|date:"D j M" }}
+    {% if occurrence.assigned_to %}· {{ occurrence.assigned_to.display_name }}
+    {% else %}· unassigned{% endif %}
+  </span>
+  {% if actions %}
+    <span class="spacer"></span>
+    {% if occurrence.assigned_to_id == member.pk or not occurrence.assigned_to_id or member.is_admin %}
+      <form class="inline" method="post" action="{% url 'chores:complete' occurrence.pk %}">
+        {% csrf_token %}<button class="action" type="submit">Done</button>
+      </form>
+    {% endif %}
+    {% if not occurrence.assigned_to_id and member.role != 'guest' %}
+      <form class="inline" method="post" action="{% url 'chores:claim' occurrence.pk %}">
+        {% csrf_token %}<button class="action ghost" type="submit">Claim</button>
+      </form>
+    {% endif %}
+  {% endif %}
+</li>

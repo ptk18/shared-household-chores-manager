@@ -1,0 +1,96 @@
+{% extends 'chores/base.html' %}
+{% load chore_extras %}
+
+{% block title %}{{ household.name }} — chores{% endblock %}
+{% block heading %}{{ household.name }} <span class="meta">· {{ today|date:"l j F" }}</span>{% endblock %}
+
+{% block content %}
+<section class="panel">
+  <h2>Today</h2>
+  {% if due_today %}
+    <ul class="chores">
+      {% for occurrence in due_today %}
+        {% include 'chores/_chore_row.html' with occurrence=occurrence actions=True %}
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="empty">Nothing due today.</p>
+  {% endif %}
+</section>
+
+<section class="panel">
+  <h2>My chores</h2>
+  {% if my_chores %}
+    <ul class="chores">
+      {% for occurrence in my_chores %}
+        {% include 'chores/_chore_row.html' with occurrence=occurrence actions=True %}
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="empty">You have nothing outstanding.</p>
+  {% endif %}
+</section>
+
+<section class="panel">
+  <h2>Overdue</h2>
+  {% if overdue %}
+    <ul class="chores">
+      {% for occurrence in overdue %}
+        {% include 'chores/_chore_row.html' with occurrence=occurrence actions=True %}
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="empty">Nothing overdue — the household is on top of things.</p>
+  {% endif %}
+</section>
+
+{% if unclaimed %}
+<section class="panel">
+  <h2>Up for grabs</h2>
+  <ul class="chores">
+    {% for occurrence in unclaimed %}
+      {% include 'chores/_chore_row.html' with occurrence=occurrence actions=True %}
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
+<section class="panel">
+  <h2>Household health · last {{ fairness.window_days }} days</h2>
+  {% if fairness.total_effort %}
+    <table class="fairness">
+      <thead>
+        <tr>
+          <th>Member</th><th>Share of effort</th>
+          <th class="num">Done</th><th class="num">Expected</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for entry in fairness.entries %}
+          <tr>
+            <td>{{ entry.member.display_name }}</td>
+            <td>
+              <div class="bar-track">
+                <div class="bar-fill{% if entry.is_overloaded %} over{% endif %}"
+                     style="width: {{ entry.actual_share|percent }}%"></div>
+              </div>
+            </td>
+            <td class="num">{{ entry.actual_share|percent }}%</td>
+            <td class="num">{{ entry.expected_share|percent }}%</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <p class="verdict">
+      {% if fairness.is_fair %}
+        Effort is spread fairly across the household.
+      {% else %}
+        {{ fairness.most_overloaded.member.display_name }} is carrying more than their
+        share; {{ fairness.most_underloaded.member.display_name }} has room to take some on.
+      {% endif %}
+    </p>
+  {% else %}
+    <p class="empty">No completed chores yet in this window.</p>
+  {% endif %}
+</section>
+{% endblock %}

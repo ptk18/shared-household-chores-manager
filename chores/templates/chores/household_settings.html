@@ -1,0 +1,38 @@
+{% extends 'chores/base.html' %}
+
+{% block title %}{{ household.name }} settings{% endblock %}
+{% block heading %}{{ household.name }} · settings{% endblock %}
+
+{% block content %}
+<section class="panel">
+  <h2>Members</h2>
+  <ul class="chores">
+    {% for m in members %}
+      <li>
+        <span class="name">{{ m.display_name }}</span>
+        <span class="tag">{{ m.get_role_display }}</span>
+        <span class="meta">capacity {{ m.capacity }}</span>
+      </li>
+    {% endfor %}
+  </ul>
+</section>
+
+<section class="panel">
+  <h2>Chores</h2>
+  {% if chores %}
+    <ul class="chores">
+      {% for c in chores %}
+        <li>
+          <span class="name">{{ c.name }}</span>
+          <span class="tag weight">effort {{ c.effort_weight }}</span>
+          <span class="meta">{{ c.get_frequency_display|lower }} · {{ c.get_category_display|lower }}</span>
+          {% if not c.is_active %}<span class="tag">inactive</span>{% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="empty">No chores yet. Seed the templates, then adopt the ones you need.</p>
+  {% endif %}
+  <p class="verdict">Editing lives in <a href="/admin/">the admin</a> for now.</p>
+</section>
+{% endblock %}
